@@ -1,0 +1,7 @@
+# Arquivos gerados pelo Godot e pelo .NET
+.godot/
+bin/
+obj/
+*.user
+*.tmp
+fotos/
