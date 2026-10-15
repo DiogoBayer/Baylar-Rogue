@@ -37,7 +37,7 @@ public partial class InimigoGuerreiro : Inimigo
                 {
                     estado = Estado.Avisando;
                     tempo = TempoAviso;
-                    materialCorpo.AlbedoColor = CorAviso;
+                    PintarCorpo(CorAviso);
                 }
                 break;
 
@@ -56,7 +56,7 @@ public partial class InimigoGuerreiro : Inimigo
 
     void Golpear(Vector3 direcao, float distancia)
     {
-        materialCorpo.AlbedoColor = CorCorpo;
+        PintarCorpo(CorCorpo);
         Visual.Piscar(this, golpe, new Color(CorAviso, 0.6f));
         bool naFrente = distancia < 0.3f || Mathf.RadToDeg(olhar.AngleTo(direcao)) <= AnguloAtaque;
         if (distancia <= AlcanceAtaque + 0.3f && naFrente)
@@ -68,7 +68,7 @@ public partial class InimigoGuerreiro : Inimigo
     // Apanhar cancela o golpe que estava sendo preparado.
     protected override void AoApanhar()
     {
-        materialCorpo.AlbedoColor = CorCorpo;
+        PintarCorpo(CorCorpo);
         estado = Estado.Recuperando;
         tempo = 0.35f;
     }

@@ -5,16 +5,16 @@ using Godot;
 
 namespace MeuRoguelike;
 
-// Monta a sala, a câmera e a interface, e controla as ondas de inimigos.
+// Monta a rua (Cenario.cs), a câmera e a interface, e controla as ondas de inimigos.
 // Cada sala limpa leva à próxima, com mais inimigos.
 public partial class Jogo : Node3D
 {
-    const float MeiaLargura = 12f;   // a sala vai de -12 a 12 em X
-    const float MeiaFundura = 8f;    // e de -8 a 8 em Z
-    static readonly Vector3 DistanciaCamera = new(0, 16.5f, 11.55f);   // mesma inclinação de 55°, mais longe para ver os magos
+    const float MeiaLargura = Cenario.MeiaLargura;
+    const float MeiaFundura = Cenario.MeiaFundura;
+    static readonly Vector3 DistanciaCamera = new(0, 15f, 13.5f);   // inclinação de 48°: mostra a sala inteira e as fachadas
 
     readonly Random sorteio = new();
-    readonly List<Vector3> pilares = new();
+    readonly List<Vector3> pilares = new();   // centros dos obstáculos da rua
     Jogador jogador;
     Camera3D camera;
     Label textoVida, textoSala, textoMensagem;
@@ -25,8 +25,7 @@ public partial class Jogo : Node3D
     public override void _Ready()
     {
         CriarControles();
-        CriarAmbiente();
-        CriarSala();
+        pilares.AddRange(Cenario.MontarRua(this));
 
         jogador = new Jogador();
         AddChild(jogador);
@@ -34,7 +33,7 @@ public partial class Jogo : Node3D
         jogador.Morreu += () => Mensagem("Você morreu\nAperte R para recomeçar");
         jogador.PediuTremor += forca => tremor = Math.Max(tremor, forca);
 
-        camera = new Camera3D { Fov = 40f, RotationDegrees = new Vector3(-55f, 0, 0), Position = DistanciaCamera };
+        camera = new Camera3D { Fov = 40f, RotationDegrees = new Vector3(-48f, 0, 0), Position = DistanciaCamera };
         AddChild(camera);
         CriarInterface();
         AtualizarVida(jogador.Vida);
@@ -135,48 +134,6 @@ public partial class Jogo : Node3D
         InputMap.AddAction(acao);
         foreach (var tecla in teclas)
             InputMap.ActionAddEvent(acao, new InputEventKey { PhysicalKeycode = tecla });
-    }
-
-    void CriarAmbiente()
-    {
-        var ambiente = new Godot.Environment
-        {
-            BackgroundMode = Godot.Environment.BGMode.Color,
-            BackgroundColor = new Color(0.06f, 0.05f, 0.08f),
-            AmbientLightSource = Godot.Environment.AmbientSource.Color,
-            AmbientLightColor = new Color(0.55f, 0.55f, 0.7f),
-            AmbientLightEnergy = 0.6f,
-            TonemapMode = Godot.Environment.ToneMapper.Filmic,
-        };
-        AddChild(new WorldEnvironment { Environment = ambiente });
-        AddChild(new DirectionalLight3D { ShadowEnabled = true, RotationDegrees = new Vector3(-60f, 30f, 0), LightEnergy = 1.1f });
-    }
-
-    void CriarSala()
-    {
-        var chao = Visual.Material(new Color(0.32f, 0.27f, 0.24f));
-        var parede = Visual.Material(new Color(0.42f, 0.36f, 0.33f));
-        var pedra = Visual.Material(new Color(0.5f, 0.45f, 0.42f));
-
-        Bloco(new Vector3(MeiaLargura * 2 + 2, 0.2f, MeiaFundura * 2 + 2), new Vector3(0, -0.1f, 0), chao);
-        Bloco(new Vector3(MeiaLargura * 2 + 2, 1.2f, 1), new Vector3(0, 0.6f, -MeiaFundura - 0.5f), parede);
-        Bloco(new Vector3(MeiaLargura * 2 + 2, 1.2f, 1), new Vector3(0, 0.6f, MeiaFundura + 0.5f), parede);
-        Bloco(new Vector3(1, 1.2f, MeiaFundura * 2), new Vector3(-MeiaLargura - 0.5f, 0.6f, 0), parede);
-        Bloco(new Vector3(1, 1.2f, MeiaFundura * 2), new Vector3(MeiaLargura + 0.5f, 0.6f, 0), parede);
-
-        foreach (var p in new[] { new Vector3(-6, 0, -3), new Vector3(6, 0, -3), new Vector3(-6, 0, 3.5f), new Vector3(6, 0, 3.5f) })
-        {
-            pilares.Add(p);
-            Bloco(new Vector3(1.2f, 2f, 1.2f), p + new Vector3(0, 1f, 0), pedra);
-        }
-    }
-
-    void Bloco(Vector3 tamanho, Vector3 posicao, StandardMaterial3D material)
-    {
-        var corpo = new StaticBody3D { Position = posicao, CollisionLayer = Camadas.Mundo, CollisionMask = 0 };
-        corpo.AddChild(Visual.Caixa(tamanho, material));
-        corpo.AddChild(new CollisionShape3D { Shape = new BoxShape3D { Size = tamanho } });
-        AddChild(corpo);
     }
 
     void CriarInterface()

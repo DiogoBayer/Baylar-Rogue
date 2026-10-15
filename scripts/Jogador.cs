@@ -18,7 +18,7 @@ public partial class Jogador : CharacterBody3D
     [Export] public float RecargaAtaque = 0.32f;
     [Export] public float InvencivelAposDano = 0.9f;
 
-    static readonly Color CorCorpo = new(0.25f, 0.55f, 1f);
+    static readonly Color CorCorpo = new(0.3f, 0.75f, 1f);
 
     public int Vida { get; private set; }
     public bool Morto => Vida <= 0;
@@ -49,7 +49,9 @@ public partial class Jogador : CharacterBody3D
 
         corpo = new Node3D();
         AddChild(corpo);
-        materialCorpo = Visual.Material(CorCorpo);
+        materialCorpo = Visual.MaterialPersonagem(CorCorpo);
+        // Luz própria fraca, para o jogador sempre se destacar na rua escura.
+        AddChild(new OmniLight3D { LightColor = new Color(0.6f, 0.85f, 1f), LightEnergy = 1.2f, OmniRange = 3.5f, Position = new Vector3(0, 2.2f, 0.4f) });
         corpo.AddChild(Visual.Boneco(1.7f, materialCorpo));
 
         noMira = new Node3D();

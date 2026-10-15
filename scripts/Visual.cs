@@ -16,6 +16,12 @@ public static class Visual
         return m;
     }
 
+    // Material dos personagens: emite um pouco da própria cor, para não sumirem na rua escura.
+    public static StandardMaterial3D MaterialPersonagem(Color cor)
+    {
+        return new StandardMaterial3D { AlbedoColor = cor, Roughness = 0.45f, EmissionEnabled = true, Emission = cor, EmissionEnergyMultiplier = 0.55f, RimEnabled = true, Rim = 0.6f };
+    }
+
     public static StandardMaterial3D MaterialBrilhante(Color cor)
     {
         return new StandardMaterial3D { AlbedoColor = cor, EmissionEnabled = true, Emission = cor, EmissionEnergyMultiplier = 2.5f };
@@ -129,6 +135,9 @@ public static class Visual
     public static void Flash(Node dono, StandardMaterial3D material, Color corNormal)
     {
         material.AlbedoColor = Colors.White;
-        dono.CreateTween().TweenProperty(material, "albedo_color", corNormal, 0.12f);
+        material.Emission = Colors.White;
+        var tween = dono.CreateTween().SetParallel();
+        tween.TweenProperty(material, "albedo_color", corNormal, 0.12f);
+        tween.TweenProperty(material, "emission", corNormal, 0.12f);
     }
 }

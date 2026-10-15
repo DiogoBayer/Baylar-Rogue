@@ -3,7 +3,7 @@
 | | |
 | --- | --- |
 | **Versão do documento** | 1.0 — 15/10/2026 |
-| **Versão do jogo** | `v2-inimigos-mago` |
+| **Versão do jogo** | `v3-rua-neon` |
 | **Repositório** | <https://github.com/DiogoBayer/Baylar-Rogue> |
 | **Responsável** | Diogo Bayer (ideias e decisões) · código escrito com o Claude |
 
@@ -69,7 +69,8 @@ Recursos guardados após cada run → melhorias permanentes, novas armas, novos 
 | --- | --- | --- |
 | Gênero | Roguelike de ação | ✅ |
 | Combate | Tempo real | ✅ |
-| Perspectiva | 2.5D, câmera de cima a 55° | ✅ (câmera ajustável) |
+| Perspectiva | 2.5D, câmera de cima a 48° | ✅ (câmera ajustável) |
+| Caminho da arte | **Misto**: cenário e inimigos em low-poly feitos por código/Blender agora; protagonista com arte de IA (Higgsfield) depois | ✅ |
 | Motor e linguagem | Godot 4.7 com C# | ✅ |
 | Personagem-base | Manequim do Diogo (`BASEmodel.blend`) | ✅ |
 | Estilo visual | Bonecos 2D num mundo 3D **ou** tudo em 3D | ❓ |
@@ -304,7 +305,8 @@ Jogo (Node3D)                      ← Jogo.cs: regras da partida
 | `InimigoGuerreiro.cs` | Inimigo corpo a corpo |
 | `InimigoMago.cs` | Inimigo à distância |
 | `Projetil.cs` | Bola de energia do mago |
-| `Visual.cs` | Materiais, carregamento do boneco, animação de andar procedural, leque, seta, flash |
+| `Cenario.cs` | A rua cyberpunk: ambiente (glow, neblina, reflexos), asfalto molhado, fachadas com lojas e letreiros, postes, limites e os 4 obstáculos |
+| `Visual.cs` | Materiais (inclusive o de personagem, que emite a própria cor), carregamento do boneco, animação de andar procedural, leque, seta, flash |
 | `Camadas.cs` | Constantes das camadas de colisão |
 | `TestesAutomaticos.cs` | Testes de combate de ponta a ponta |
 
@@ -376,11 +378,13 @@ Posicionando ──(recarga pronta e jogador a até 15 m)──▶ Mirando (linh
 
 `Area3D` esférica que anda em linha reta. Some ao tocar o mundo (paredes e pilares bloqueiam tiros), ao tocar o jogador (causando dano e empurrão) ou depois de 4 s. Pode ser destruída pelo golpe do jogador.
 
-### 13.4 Sala e ondas (provisório)
+### 13.4 Rua e ondas (provisório)
 
-- Sala de 24 × 16 m (X de −12 a 12, Z de −8 a 8), paredes de 1,2 m e pilares de 1,2 × 2 × 1,2 m em (±6, −3) e (±6, 3,5).
+- Área de jogo de 24 × 16 m (X de −12 a 12, Z de −8 a 8), montada por `Cenario.MontarRua` (seção 15.1).
+- Limites: fachada dos prédios ao norte, mureta baixa ao sul (para não tapar a câmera), barricadas listradas a leste e oeste.
+- Obstáculos (onde antes ficavam os pilares): carro em (−6, −3), quiosque holográfico em (6, −3), caçamba em (−6, 3,5) e pilha de caixotes em (6, 3,5). Bloqueiam personagens e tiros.
 - A sala *N* tem **2 + N** inimigos: `min(total − 1, 1 + (N − 1) / 2)` magos e o resto guerreiros.
-- Inimigos nascem em posição sorteada a pelo menos 6 m do jogador e 1,8 m dos pilares.
+- Inimigos nascem em posição sorteada a pelo menos 6 m do jogador e 1,8 m do centro dos obstáculos.
 - A partir da sala 3, todos os inimigos ganham +0,25 m/s de velocidade por sala.
 - Sala limpa → mensagem por 1,8 s → próxima sala.
 
@@ -388,7 +392,7 @@ Este sistema será substituído pela estrutura de andar escolhida na seção 8.
 
 ### 13.5 Câmera
 
-Perspectiva com FOV 40°, inclinada 55° para baixo, a (0; 16,5; 11,55) do jogador. Segue com suavização exponencial (`1 − e^(−8·dt)`) e treme ao acertar (0,12) ou ser atingido (0,3).
+Perspectiva com FOV 40°, inclinada 48° para baixo, a (0; 15; 13,5) do jogador (mostra a área inteira e os letreiros das fachadas). Segue com suavização exponencial (`1 − e^(−8·dt)`) e treme ao acertar (0,12) ou ser atingido (0,3).
 
 ## 14. Números de equilíbrio
 
@@ -447,8 +451,45 @@ Ficam no topo de cada classe, a maioria marcada com `[Export]` (editável no ins
 
 - Empurrão do golpe do jogador: 10 → 6, porque o inimigo saía do alcance e o segundo golpe errava.
 - Câmera: altura 13 → 16,5, e distância ideal do mago 7,5 → 6,5, porque o mago ficava fora da tela.
+- Câmera: inclinação 55° → 48° e posição (0; 15; 13,5), porque os letreiros da rua ficavam fora da tela.
+- Personagens passaram a emitir a própria cor e o jogador ganhou uma luz própria, porque sumiam na rua escura.
 
 ## 15. Arte e modelos
+
+### 15.1 Direção de arte: rua cyberpunk à noite
+
+| Elemento | Como é feito hoje |
+| --- | --- |
+| Clima | Noite, neblina violeta fraca, luar azulado fraco; a luz vem do neon |
+| Paleta | Ciano (0,1; 0,9; 1), magenta (1; 0,15; 0,75), âmbar (1; 0,6; 0,1), violeta (0,6; 0,3; 1) sobre azul-escuro |
+| Brilho | `WorldEnvironment` com glow (modo *Screen*, limiar 0,95). Materiais `Cenario.Neon(cor, força)` com emissão acima de 1 "estouram" e brilham |
+| Chão | Asfalto quase preto, liso (rugosidade 0,12) e um pouco metálico, com reflexos em espaço de tela (SSR): parece molhado |
+| Fachadas | Lojas com vitrine iluminada, porta, toldo com faixa de neon e letreiro (`Label3D` com cor acima de 1): RAMEN 24H, NEURO//LINK, BAYLAR, CHROME DOC, PACHINKO, NOODLE BAR. Janelas dos andares de cima acesas ao acaso (semente fixa 2077). Placa vertical "HOTEL" com mau contato (pisca) |
+| Rua | Calçada, meio-fio, faixa central tracejada em âmbar, postes com luz ciano e magenta |
+| Personagens | `Visual.MaterialPersonagem`: emitem 0,55 da própria cor e têm borda clara (*rim*), para se destacarem. O jogador tem uma luz própria fraca |
+
+**Regra de legibilidade:** o cenário pode ser escuro e cheio de neon, mas personagens, avisos de ataque e projéteis precisam ser sempre as coisas mais fáceis de ver na tela.
+
+### 15.2 Personagens planejados 💡
+
+| No jogo hoje | Versão cyberpunk |
+| --- | --- |
+| Jogador | Mercenário de rua com lâmina de energia; implantes permitem o dash |
+| Guerreiro | Segurança corporativo com armadura e bastão de choque que brilha antes de bater |
+| Mago | Netrunner (hacker) de capuz e visor; dispara pulsos de dados |
+| Próximo inimigo | Drone kamikaze: voa até o jogador, pisca e explode |
+
+### 15.3 Ferramentas de arte
+
+| Ferramenta | Uso | Situação |
+| --- | --- | --- |
+| Blender 5.2 (scripts) | Modelos low-poly feitos por código; conversão para `.glb` | Instalado |
+| Blender MCP (`ahujasid/blender-mcp`, MIT) | O Claude controla o Blender com a janela aberta | Planejado para a etapa dos personagens |
+| Higgsfield (conectado ao Claude) | Arte conceito, modelo 3D a partir de imagem (Meshy, Tripo, Hunyuan3D), esqueleto e animações automáticos | Conta no plano grátis, **0 créditos**; usar no protagonista |
+| Mixamo (Adobe, grátis) | Esqueleto e animações para personagens humanoides | Alternativa gratuita ao Higgsfield para animar |
+| Kenney / Quaternius (CC0) | Pacotes gratuitos (cidade, ficção científica); nenhum cyberpunk de verdade | Opcional |
+
+### 15.4 Modelo do boneco
 
 - **Original:** `modelos/fonte/BASEmodel.blend` (Blender 2.82). Manequim humano em pose A, cerca de 1.200 vértices, esqueleto de 53 ossos, **sem animações e sem materiais**.
 - **No jogo:** `modelos/boneco.glb`, exportado **sem esqueleto** por `ferramentas/blender/exportar_boneco.py`:
@@ -461,7 +502,7 @@ Ficam no topo de cada classe, a maioria marcada com `[Export]` (editável no ins
   Motivo: com o esqueleto, o osso raiz chegava ao Godot girado cerca de 93° e o boneco aparecia deitado; o `.blend` também tinha três modificadores *Armature* vazios.
 - **No código:** `Visual.Boneco(altura, material)` carrega o `.glb`, aplica o material, mede a caixa do modelo e ajusta escala e posição para que os pés fiquem em y = 0 e a altura seja a pedida. A frente do modelo é +Z.
 - **Animação:** provisória e procedural (`Visual.AnimarAndar`): pulo, inclinação para a frente e gingado proporcionais à velocidade. Para animações de verdade, o boneco precisa ser animado (Blender ou Mixamo) e o osso raiz, corrigido.
-- **Cores provisórias:** jogador azul; guerreiro vermelho (amarelo no aviso); mago roxo (lilás na mira).
+- **Cores provisórias:** jogador ciano; guerreiro vermelho (amarelo no aviso); mago roxo (lilás na mira).
 
 ## 16. Testes
 
@@ -515,3 +556,4 @@ Ficam no topo de cada classe, a maioria marcada com `[Export]` (editável no ins
 | --- | --- |
 | `v1-prototipo-combate` | Sala, jogador (andar, mirar, golpe, dash), inimigo corpo a corpo, ondas, testes |
 | `v2-inimigos-mago` | Base de inimigos, Guerreiro e Mago, projétil, boneco do projeto, câmera afastada |
+| `v3-rua-neon` | Rua cyberpunk à noite (neon, glow, neblina, asfalto molhado, lojas, postes, carro, quiosque), personagens que brilham, câmera a 48° |

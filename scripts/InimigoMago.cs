@@ -82,7 +82,7 @@ public partial class InimigoMago : Inimigo
             tempo = TempoMira;
             direcaoTiro = direcao;
             linhaMira.Visible = true;
-            materialCorpo.AlbedoColor = CorMira;
+            PintarCorpo(CorMira);
         }
     }
 
@@ -102,7 +102,7 @@ public partial class InimigoMago : Inimigo
     {
         estado = Estado.Posicionando;
         linhaMira.Visible = false;
-        materialCorpo.AlbedoColor = CorCorpo;
+        PintarCorpo(CorCorpo);
     }
 
     // Apanhar enquanto mira cancela o tiro.

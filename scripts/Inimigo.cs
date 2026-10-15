@@ -43,7 +43,7 @@ public abstract partial class Inimigo : CharacterBody3D
 
         modelo = new Node3D();
         AddChild(modelo);
-        materialCorpo = Visual.Material(CorCorpo);
+        materialCorpo = Visual.MaterialPersonagem(CorCorpo);
         modelo.AddChild(Visual.Boneco(Altura, materialCorpo));
         Montar();
     }
@@ -91,6 +91,13 @@ public abstract partial class Inimigo : CharacterBody3D
         Visual.Flash(this, materialCorpo, CorCorpo);
     }
 
+    // Troca a cor do corpo (e do brilho dele), por exemplo no aviso de ataque.
+    protected void PintarCorpo(Color cor)
+    {
+        materialCorpo.AlbedoColor = cor;
+        materialCorpo.Emission = cor;
+    }
+
     // Por padrão, apanhar não muda nada; cada tipo pode cancelar o próprio ataque aqui.
     protected virtual void AoApanhar() { }
 
@@ -100,7 +107,7 @@ public abstract partial class Inimigo : CharacterBody3D
         RemoveFromGroup(Grupo);
         AoApanhar();
         colisao.SetDeferred(CollisionShape3D.PropertyName.Disabled, true);
-        materialCorpo.AlbedoColor = Colors.White;
+        PintarCorpo(Colors.White);
         var tween = CreateTween();
         tween.TweenProperty(modelo, "scale", new Vector3(1.4f, 0.05f, 1.4f), 0.18f);
         tween.TweenCallback(Callable.From(QueueFree));

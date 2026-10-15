@@ -30,12 +30,13 @@ Tudo é montado por código a partir de `cenas/Jogo.tscn`, que só carrega `scri
 
 | Arquivo | O que faz |
 | --- | --- |
-| `Jogo.cs` | Sala (chão, paredes, 4 pilares), luz, câmera a 55° que segue o jogador e treme, interface, ondas: sala N tem 2+N inimigos, com 1 mago na sala 1 e mais um a cada duas salas. Sala limpa → próxima. `-- --foto=CAMINHO --atraso=S` salva uma foto |
+| `Jogo.cs` | Chama `Cenario.MontarRua`, câmera a 48° que segue o jogador e treme, interface, ondas: sala N tem 2+N inimigos, com 1 mago na sala 1 e mais um a cada duas salas. Sala limpa → próxima. `-- --foto=CAMINHO --atraso=S` salva uma foto |
 | `Jogador.cs` | Andar (WASD), mirar (mouse no plano do chão, setinha no chão), golpe em leque (clique/J) que também destrói projéteis, dash (Espaço) com invencibilidade atravessando inimigos, vida 5 |
 | `Inimigo.cs` | Base abstrata de todo inimigo: vida, corpo (boneco), empurrão, flash, morte. Cada tipo implementa `Pensar` e pode sobrescrever `Montar`, `AoApanhar`, `CorCorpo`, `Altura` |
 | `InimigoGuerreiro.cs` | Corpo a corpo: Perseguindo → Avisando (amarelo 0,55 s, parado) → golpe em leque → Recuperando. 3 de vida. Apanhar cancela o aviso |
 | `InimigoMago.cs` | À distância: mantém ~6,5 m (recua, aproxima, anda de lado), Mirando (linha roxa 0,7 s, direção travada) → `Projetil`. 2 de vida, chapéu cônico. Apanhar cancela a mira |
 | `Projetil.cs` | Bola de energia (Area3D): linha reta a 9 m/s, some em parede/pilar/jogador ou após 4 s |
+| `Cenario.cs` | Rua cyberpunk (tema decidido): glow, neblina, SSR, fachadas com letreiros, postes, limites e 4 obstáculos; devolve os centros dos obstáculos |
 | `Visual.cs` | Materiais, `Boneco` (carrega `modelos/boneco.glb`, pinta, ajusta altura e pés em y=0), `AnimarAndar` (balanço e inclinação por código, porque o modelo não tem animações), leque, seta |
 | `Camadas.cs` | Camadas de colisão (mundo, jogador, inimigos) |
 | `TestesAutomaticos.cs` | 10 testes de combate (guerreiro, mago, projétil) rodados com `-- --teste` |
