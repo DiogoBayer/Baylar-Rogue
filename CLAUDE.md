@@ -40,7 +40,7 @@ Tudo é montado por código a partir de `cenas/Jogo.tscn`, que só carrega `scri
 ### Modelo do boneco
 
 - Original do Diogo: `modelos/fonte/BASEmodel.blend` (Blender 2.82, manequim em pose A, esqueleto de 53 ossos, sem animações nem materiais). A pasta tem `.gdignore` para o Godot não importá-la.
-- `modelos/boneco.glb` é exportado **sem esqueleto** (mesh estática): com o esqueleto, o osso raiz entrava no Godot girado ~93° e o boneco aparecia deitado; o .blend também tinha 3 modificadores Armature vazios. Exportar com o Blender 5.2 (`C:\Program Files\Blender Foundation\Blender 5.2lender.exe -b`): remover modificadores Armature, aplicar o Mirror, `parent_clear(CLEAR_KEEP_TRANSFORM)`, apagar Armature/câmera/luz, exportar GLB com `use_selection`.
+- `modelos/boneco.glb` é exportado **sem esqueleto** (mesh estática): com o esqueleto, o osso raiz entrava no Godot girado ~93° e o boneco aparecia deitado; o .blend também tinha 3 modificadores Armature vazios. Exportar com o Blender 5.2 (`C:\Program Files\Blender Foundation\Blender 5.2\blender.exe -b`): remover modificadores Armature, aplicar o Mirror, `parent_clear(CLEAR_KEEP_TRANSFORM)`, apagar Armature/câmera/luz, exportar GLB com `use_selection`.
 - Para animar de verdade, será preciso refazer o rig/animações (Blender ou Mixamo) e consertar a rotação do osso raiz.
 
 Decisões já tomadas: C# no Godot (pedido do Diogo); visual 2.5D ainda indefinido; combate em tempo real; empurrão do golpe do jogador = 6 (com 10 o segundo golpe não alcançava); câmera afastada (16,5 de altura) para os magos não ficarem fora da tela.
