@@ -1,4 +1,7 @@
-# Meu Roguelike — contexto do projeto
+# Baylar Rogue — contexto do projeto
+
+- **Repositório oficial:** <https://github.com/DiogoBayer/Baylar-Rogue> (branch `main`). Commitar e enviar para lá; etiquetas `vN-descricao` também vão (`git push --tags`).
+- **Documento técnico e de design:** `docs/documento-tecnico.md`. É a fonte da verdade sobre ideia, referências, decisões (✅/💡/❓), sistemas e números. Atualize no mesmo commit de qualquer mudança que o afete.
 
 Jogo roguelike 2.5D de ação em tempo real do Diogo. **O Diogo não programa**: ele traz as ideias e decide; o Claude escreve todo o código, testa e explica. Escreva sempre em português do Brasil.
 
