@@ -27,7 +27,7 @@ Este documento reúne **tudo o que define o jogo**: a ideia, as referências que
 
 ## 1. Visão
 
-Baylar Rogue é um **roguelike de ação em tempo real, em 2.5D**, com câmera de cima na diagonal. O jogador atravessa uma sequência de salas cheias de inimigos, fica mais forte ao longo da run com poderes e recompensas, e enfrenta um chefe. Ao morrer, a run recomeça do zero, mas parte do progresso permanece e abre novas possibilidades.
+Baylar Rogue é um **roguelike de ação em tempo real, em 2.5D, com tema cyberpunk**: o personagem atravessa as ruas de uma cidade cyberpunk, vistas de cima na diagonal. O jogador atravessa uma sequência de salas cheias de inimigos, fica mais forte ao longo da run com poderes e recompensas, e enfrenta um chefe. Ao morrer, a run recomeça do zero, mas parte do progresso permanece e abre novas possibilidades.
 
 A sensação desejada é a dos combates de **Hades** e **Cult of the Lamb**: rápidos, legíveis e justos. Cada golpe inimigo é avisado, e a habilidade do jogador (posicionamento, dash, escolha de alvo) decide o resultado.
 
@@ -73,7 +73,8 @@ Recursos guardados após cada run → melhorias permanentes, novas armas, novos 
 | Motor e linguagem | Godot 4.7 com C# | ✅ |
 | Personagem-base | Manequim do Diogo (`BASEmodel.blend`) | ✅ |
 | Estilo visual | Bonecos 2D num mundo 3D **ou** tudo em 3D | ❓ |
-| Tema, mundo e história | — | ❓ |
+| Tema | **Cyberpunk**: o personagem anda e luta pelas ruas de uma cidade cyberpunk | ✅ |
+| Mundo e história | — | ❓ |
 | Significado de "Baylar" | — | ❓ |
 | Estrutura do andar | Grade de salas gerada (estilo Cult of the Lamb), sala a sala por portas (estilo Hades), ou mapa de caminhos | ❓ (ver seção 8) |
 | Armas | Uma arma fixa ou várias para escolher | ❓ |
