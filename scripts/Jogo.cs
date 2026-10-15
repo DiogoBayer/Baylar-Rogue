@@ -11,7 +11,7 @@ public partial class Jogo : Node3D
 {
     const float MeiaLargura = 12f;   // a sala vai de -12 a 12 em X
     const float MeiaFundura = 8f;    // e de -8 a 8 em Z
-    static readonly Vector3 DistanciaCamera = new(0, 13f, 9.1f);
+    static readonly Vector3 DistanciaCamera = new(0, 16.5f, 11.55f);   // mesma inclinação de 55°, mais longe para ver os magos
 
     readonly Random sorteio = new();
     readonly List<Vector3> pilares = new();
@@ -46,7 +46,8 @@ public partial class Jogo : Node3D
             return;
         }
         var foto = argumentos.FirstOrDefault(a => a.StartsWith("--foto="));
-        if (foto != null) _ = TirarFoto(foto["--foto=".Length..]);
+        var atraso = argumentos.FirstOrDefault(a => a.StartsWith("--atraso="));
+        if (foto != null) _ = TirarFoto(foto["--foto=".Length..], atraso != null ? double.Parse(atraso["--atraso=".Length..], System.Globalization.CultureInfo.InvariantCulture) : 1.5);
 
         ProximaSala();
     }
@@ -83,14 +84,18 @@ public partial class Jogo : Node3D
     {
         sala++;
         textoSala.Text = $"Sala {sala}";
+        // Sala N tem 2 + N inimigos: 1 mago na sala 1 e mais um a cada duas salas; o resto são guerreiros.
         int quantidade = 2 + sala;
-        for (int i = 0; i < quantidade; i++)
-            CriarInimigo(PosicaoLivre());
+        int magos = Math.Min(quantidade - 1, 1 + (sala - 1) / 2);
+        for (int i = 0; i < magos; i++)
+            CriarInimigo<InimigoMago>(PosicaoLivre());
+        for (int i = magos; i < quantidade; i++)
+            CriarInimigo<InimigoGuerreiro>(PosicaoLivre());
     }
 
-    public Inimigo CriarInimigo(Vector3 posicao)
+    public T CriarInimigo<T>(Vector3 posicao) where T : Inimigo, new()
     {
-        var inimigo = new Inimigo { Alvo = jogador, Position = posicao };
+        var inimigo = new T { Alvo = jogador, Position = posicao };
         // A partir da sala 3, os inimigos ficam um pouco mais rápidos.
         inimigo.Velocidade += Math.Max(0, sala - 2) * 0.25f;
         AddChild(inimigo);
@@ -212,9 +217,9 @@ public partial class Jogo : Node3D
     void Mensagem(string texto) => textoMensagem.Text = texto;
 
     // Usado para conferir o visual sem jogar: salva uma imagem da tela e fecha.
-    async System.Threading.Tasks.Task TirarFoto(string caminho)
+    async System.Threading.Tasks.Task TirarFoto(string caminho, double atraso)
     {
-        await ToSignal(GetTree().CreateTimer(1.5), SceneTreeTimer.SignalName.Timeout);
+        await ToSignal(GetTree().CreateTimer(atraso), SceneTreeTimer.SignalName.Timeout);
         GetViewport().GetTexture().GetImage().SavePng(caminho);
         GD.Print("Foto salva em ", caminho);
         GetTree().Quit();

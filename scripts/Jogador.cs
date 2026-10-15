@@ -28,13 +28,15 @@ public partial class Jogador : CharacterBody3D
     public event Action Morreu;
     public event Action<float> PediuTremor;
 
-    Node3D corpo;
+    Node3D corpo;       // o boneco: balança e inclina ao andar
+    Node3D noMira;      // a setinha e o golpe: só giram para a mira
     StandardMaterial3D materialCorpo;
     MeshInstance3D golpe;
     Vector3 mira = Vector3.Forward;
     Vector3 direcaoDash;
     Vector3 empurrao;
     float tempoDash, tempoRecargaDash, tempoRecargaAtaque, tempoInvencivel;
+    float faseAndar;
 
     public override void _Ready()
     {
@@ -43,17 +45,18 @@ public partial class Jogador : CharacterBody3D
         CollisionLayer = Camadas.Jogador;
         CollisionMask = Camadas.Mundo | Camadas.Inimigos;
 
-        AddChild(new CollisionShape3D { Shape = new CapsuleShape3D { Radius = 0.4f, Height = 1.6f }, Position = new Vector3(0, 0.8f, 0) });
+        AddChild(new CollisionShape3D { Shape = new CapsuleShape3D { Radius = 0.4f, Height = 1.7f }, Position = new Vector3(0, 0.85f, 0) });
 
         corpo = new Node3D();
         AddChild(corpo);
         materialCorpo = Visual.Material(CorCorpo);
-        corpo.AddChild(Visual.Capsula(0.4f, 1.6f, materialCorpo));
-        var nariz = Visual.Caixa(new Vector3(0.2f, 0.2f, 0.35f), Visual.Material(Colors.White));
-        nariz.Position = new Vector3(0, 1.15f, 0.42f);
-        corpo.AddChild(nariz);
+        corpo.AddChild(Visual.Boneco(1.7f, materialCorpo));
+
+        noMira = new Node3D();
+        AddChild(noMira);
+        noMira.AddChild(Visual.Seta(new Color(1, 1, 1, 0.6f)));
         golpe = Visual.Leque(AlcanceAtaque, AnguloAtaque, Colors.White);
-        corpo.AddChild(golpe);
+        noMira.AddChild(golpe);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -94,7 +97,8 @@ public partial class Jogador : CharacterBody3D
         Velocity += empurrao;
         MoveAndSlide();
 
-        corpo.Rotation = new Vector3(0, Mathf.Atan2(mira.X, mira.Z), 0);
+        Visual.AnimarAndar(corpo, Velocity, mira, ref faseAndar, d);
+        noMira.Rotation = new Vector3(0, Mathf.Atan2(mira.X, mira.Z), 0);
     }
 
     public override void _Process(double delta)
@@ -102,6 +106,7 @@ public partial class Jogador : CharacterBody3D
         // Pisca enquanto está invencível depois de levar dano.
         bool piscando = tempoInvencivel > 0 && tempoDash <= 0 && !Morto;
         corpo.Visible = !piscando || (int)(tempoInvencivel * 16) % 2 == 0;
+        noMira.Visible = !Morto;
     }
 
     void AtualizarMiraPeloMouse()
@@ -146,6 +151,17 @@ public partial class Jogador : CharacterBody3D
             if (distancia > AlcanceAtaque + inimigo.Raio) continue;
             if (distancia > 0.3f && Mathf.RadToDeg(mira.AngleTo(para)) > AnguloAtaque) continue;
             inimigo.ReceberDano(DanoAtaque, (distancia > 0.01f ? para / distancia : mira) * 6f);
+            acertos++;
+        }
+        // O golpe também destrói as bolas de energia dos magos.
+        foreach (var no in GetTree().GetNodesInGroup(Projetil.Grupo))
+        {
+            if (no is not Projetil bola || bola.Destruido) continue;
+            var para = bola.GlobalPosition - GlobalPosition;
+            para.Y = 0;
+            if (para.Length() > AlcanceAtaque + 0.3f) continue;
+            if (para.Length() > 0.3f && Mathf.RadToDeg(mira.AngleTo(para)) > AnguloAtaque) continue;
+            bola.Destruir();
             acertos++;
         }
         if (acertos > 0) PediuTremor?.Invoke(0.12f);
